@@ -60,7 +60,7 @@ output application/json
 output application/json
 ---
 {
-    personajes: payload.personajes filter ((personaje) -> (personaje.gender == "male"))
+    personajes: vars.personajes.personajes filter ((personaje) -> (personaje.gender == "male"))
 }]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
@@ -73,7 +73,7 @@ output application/json
 output application/json
 ---
 {
-    personajes: payload.personajes filter ((personaje) -> (personaje.gender == "n/a"))
+    personajes: vars.personajes.personajes filter ((personaje) -> (personaje.gender == "female"))
 }]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
@@ -87,7 +87,7 @@ output application/json
 output application/json
 ---
 {
-    personajes: payload.personajes filter ((personaje) -> (personaje.gender == "n/a"))
+    personajes: vars.personajes.personajes filter ((personaje) -> (personaje.gender == "n/a"))
 }]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
