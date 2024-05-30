@@ -51,16 +51,7 @@ output application/java
 		<error-handler ref="global_error_handler" />
     </flow>
     <flow name="get:\status-check:spstecnicalpractice-config">
-        <ee:transform doc:name="Transform Message">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "La api se encuentra corriendo sin problemas!"
-} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="c1e6e02c-b587-47fd-99af-5551d25cac5b" name="health-check.status"/>
 		<error-handler ref="global_error_handler" />
     </flow>
 </mule>
