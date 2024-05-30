@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+    <configuration doc:name="Configuration" doc:id="f70b13ec-daa4-42ff-b687-f344eafe25d5" defaultErrorHandler-ref="global_error_handler" />
+    <apikit:config name="spstecnicalpractice-config" api="resource::b8c23778-e418-4ada-9661-537d7fba910f:spstecnicalpractice:1.0.1:raml:zip:spstecnicalpractice.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="67e8de33-8eb4-4304-887b-fa1fb1130489">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+	<http:request-config name="HTTPS_Swapi_Call_Configuration" doc:name="HTTP Request configuration" doc:id="f6c1b468-4adf-4a5e-80f9-126077eb4e7b" basePath="/api/" >
+		<http:request-connection protocol="HTTPS" host="swapi.dev" />
+	</http:request-config>
+</mule>

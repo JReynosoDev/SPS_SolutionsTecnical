@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+	<flow name="spstecnicalpractice-main">
+        <http:listener path="/swapi/v1/*" config-ref="HTTP_Listener_config" allowedMethods="GET">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="spstecnicalpractice-config" />
+        <error-handler ref="global_error_handler" />
+    </flow>
+    <flow name="spstecnicalpractice-console">
+        <http:listener path="/console/*" config-ref="HTTP_Listener_config">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="spstecnicalpractice-config" />
+        <error-handler ref="global_error_handler" />
+    </flow>
+    <flow name="get:\personajes:spstecnicalpractice-config">
+		<logger level="INFO" message="Flujo Iniciado, recolectando personajes" doc:name="Logger Inicio"/>
+		<ee:transform doc:name="Iniciar Variables" doc:id="6a9b65a3-97c3-4940-8275-39ff2938cb73" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="gender" ><![CDATA[(attributes.queryParams.gender) as String default ""]]></ee:set-variable>
+				<ee:set-variable variableName="personajes" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "personajes": []
+}]]></ee:set-variable>
+				<ee:set-variable variableName="contador" ><![CDATA[%dw 2.0
+output application/java
+---
+1
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="realizar llamada" doc:id="d6b9ab38-e76f-4bac-84e5-4645e6aeacf1" name="APICall.swapi_call"/>
+		<logger level="INFO" doc:name="Logger Final" doc:id="cde14253-2bee-4cf4-89a9-215cd3f802f2" message="Flujo Terminado, personajes recolectados y formato realizado" />
+		<error-handler ref="global_error_handler" />
+    </flow>
+    <flow name="get:\status-check:spstecnicalpractice-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "La api se encuentra corriendo sin problemas!"
+} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler ref="global_error_handler" />
+    </flow>
+</mule>

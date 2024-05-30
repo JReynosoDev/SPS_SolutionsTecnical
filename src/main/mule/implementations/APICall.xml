@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="APICall.swapi_call" doc:id="53bc8c47-0dd9-41df-89cf-80cc162a6417" >
+		<http:request method="GET" doc:name="Request" doc:id="1cdb64fd-49d1-4d7c-b62c-798caedde347" config-ref="HTTPS_Swapi_Call_Configuration" path="people">
+					<http:query-params><![CDATA[#[output application/java
+---
+{
+	"page" : vars.contador
+}]]]></http:query-params>
+				</http:request>
+		<ee:transform doc:name="Mapeo de datos" doc:id="97e37273-de8b-4fd6-bb16-4021dd8d27d9" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="contador" ><![CDATA[%dw 2.0
+output application/java
+---
+(vars.contador as Number) + 1]]></ee:set-variable>
+				<ee:set-variable variableName="personajes" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "personajes": vars.personajes.personajes ++ (payload.results map ((item, index) -> 
+        {
+	        "name": item.name,
+	        "height":item.height,
+	        "mass": item.mass,
+	        "hair_color": item.hair_color,
+	        "skin_color": item.skin_color,
+	        "eye_color": item.eye_color,
+	        "birth_year": item.birth_year,
+	        "gender": item.gender
+        }
+    ))
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<choice doc:name="Choice" doc:id="48b73754-886e-48fa-a1bf-8baec7b0a8b6" >
+			<when expression="#[payload.next != null]">
+				<flow-ref doc:name="obtener siguiente set de personajes" doc:id="bcdfccb8-e501-4d29-8d32-cf441b5228ba" name="APICall.swapi_call"/>
+			</when>
+			<otherwise >
+				<flow-ref doc:name="terminar transformacion de los datos" doc:id="2de16ebe-6988-490c-9a51-3e651299c8c7" name="APICall.transform_and_filter"/>
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<sub-flow name="APICall.transform_and_filter" doc:id="b62ef77e-4ed6-458f-a2ab-240bb7f98ae5" >
+		<choice doc:name="Choice" doc:id="343aa0df-da11-4096-b19b-8f29754fb22b" >
+			<when expression='#[vars.gender == "male"]'>
+				<ee:transform doc:name="Filtrar por hombres" doc:id="c0971655-c3ee-4194-8750-01c95e1318bd" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="personajes" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    personajes: payload.personajes filter ((personaje) -> (personaje.gender == "male"))
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<when expression='#[vars.gender == "female"]'>
+				<ee:transform doc:name="Filtrar por mujeres" doc:id="0676eda7-4a2a-4e5f-a33d-ea9c13b2d17e" >
+					<ee:message />
+					<ee:variables >
+						<ee:set-variable variableName="personajes" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    personajes: payload.personajes filter ((personaje) -> (personaje.gender == "n/a"))
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+
+			</when>
+			<when expression='#[vars.gender == "n/a"]'>
+				<ee:transform doc:name="Filtrar por genero N/A" doc:id="abf95af4-0cd1-4a66-a84c-c19e59f5e68c" >
+					<ee:message />
+					<ee:variables >
+						<ee:set-variable variableName="personajes" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    personajes: payload.personajes filter ((personaje) -> (personaje.gender == "n/a"))
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+
+			</when>
+		</choice>
+		<set-payload value="#[%dw 2.0&#10;output application/csv&#10;---&#10;vars.personajes.personajes]" doc:name="Colocar resultados en formato indicado" doc:id="1594d7f6-4b75-4396-978f-bd12d678b354" />
+	</sub-flow>
+</mule>

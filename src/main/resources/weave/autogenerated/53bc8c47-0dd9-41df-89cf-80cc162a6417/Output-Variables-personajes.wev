@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_53bc8c47_0dd9_41df_89cf_80cc162a6417_Output_Variables_personajes = {| personajes: Array<Nothing> |}
+
